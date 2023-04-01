@@ -91,7 +91,7 @@ app.use('/api/order', orderRouter);
 app.use('/api/manager', managerRouter);
 app.use('/api/product', productRouter);
 
-mongoose.connect("mongodb+srv://ECERest:mo2468097531@mern1.ahendlt.mongodb.net/?retryWrites=true&w=majority").then(() => {
+mongoose.connect(process.env.MONGO_URI).then(() => {
   server.listen(PORT, () => {
     console.log("SERVER RUNNING ON PORT", PORT, "AND DB CONNECTED...");
   });
