@@ -5,7 +5,22 @@ const PORT = process.env.PORT || 3002;
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
-app.use(cors());
+
+const allowedOrigins = [
+  'https://ecerest.onrender.com',
+  'https://ecerest2.onrender.com'
+]
+app.use(cors({
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+}));
 app.use(express.json());
 const mongoose = require('mongoose');
 
@@ -59,10 +74,10 @@ io.on("connection", (socket) => {
     removeUser(socket.id);
     console.log(users);
   });
-  
+
   socket.on("addOrder", data => {
     for (const user of users) {
-      if(user.rule!=='user') socket.to(user.socketId).emit("addOrder", data)
+      if (user.rule !== 'user') socket.to(user.socketId).emit("addOrder", data)
     }
     console.log(users);
   })
@@ -76,7 +91,7 @@ app.use('/api/order', orderRouter);
 app.use('/api/manager', managerRouter);
 app.use('/api/product', productRouter);
 
-mongoose.connect(process.env.MONGO_URI).then(() => {
+mongoose.connect("mongodb+srv://ECERest:mo2468097531@mern1.ahendlt.mongodb.net/?retryWrites=true&w=majority").then(() => {
   server.listen(PORT, () => {
     console.log("SERVER RUNNING ON PORT", PORT, "AND DB CONNECTED...");
   });
