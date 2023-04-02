@@ -7,8 +7,8 @@ const cors = require("cors");
 const { Server } = require("socket.io");
 
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001'
+  'https://ecerest.onrender.com',
+  'https://ecerest2.onrender.com'
 ]
 app.use(cors({
   origin: (origin, callback) => {
