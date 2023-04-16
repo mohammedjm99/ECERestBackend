@@ -4,7 +4,25 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {verifyTokenAndAdmin} = require('../controllers/verify');
 
-router.post('/',verifyTokenAndAdmin,async(req,res,next)=>{
+router.get('/', async(req,res)=>{
+    try{
+        const managers = await Manager.find().select('-password');
+        res.status(200).json(managers);
+    }catch(e){
+        res.status(400).json("can't get managers");
+    }
+});
+
+router.delete('/:id', async(req,res)=>{
+    try{
+        const manager = await Manager.findByIdAndDelete(req.params.id);
+        res.status(200).json(manager._id);
+    }catch(e){
+        res.status(400).json("can't get managers");
+    }
+})
+
+router.post('/',async(req,res)=>{
     const {username,password,rule} = req.body;
     if(!rule || !username || !password) return res.status(400).json('please fill all inputs...');
     try{

@@ -3,25 +3,33 @@ const Schema = mongoose.Schema;
 
 const paidOrderSchema = new Schema({
     table: {
-        type: Schema.Types.ObjectId,
-        ref: 'table',
-        required:true,
+        _id: {
+            type: String,
+            required: true
+        },
+        number: {
+            type: Number,
+            required: true,
+        },
     },
-    products:[
+    products: [
         {
-            product:{
-                type: Schema.Types.ObjectId,
-                ref: 'product',
+            name: {
+                type: String,
+                required: true,
+            },
+            price: {
+                type: Number,
                 required: true
             },
-            quantity:{
-                type:Number,
-                required:true
+            quantity: {
+                type: Number,
+                required: true
             },
-            _id:false
+            _id: false
         }
     ],
     createdAt: { type: Date, default: Date.now }
 })
 
-module.exports = mongoose.model('paidorder',paidOrderSchema);
+module.exports = mongoose.model('paidorder', paidOrderSchema);
