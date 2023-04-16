@@ -7,24 +7,21 @@ const { verifyTokenAndAuthorization, verifyTokenAndChief, verifyTokenAndAdmin } 
 
 router.post('/:id', verifyTokenAndAuthorization, async (req, res) => {
     const { products } = req.body;
+    let orderedProducts = []
     try {
         for (const product of products) {
-            const foundProduct = await Product.findById(product.product);
+            const foundProduct = await Product.findById(product.product).select('name price -_id');
+            orderedProducts.push({...foundProduct._doc,quantity:product.quantity});
             if (!foundProduct) return res.status(400).json("Item to be ordered is not found.");
         }
+        const table = await Table.findById(req.params.id).select('number');
+
         const newOrder = new InProgressOrder({
-            table: req.params.id,
-            products,
+            products:orderedProducts,
+            table
         })
         await newOrder.save();
-        const populatedOrder = await newOrder.populate([{
-            path: 'products.product',
-            select: 'name',
-        }, {
-            path: 'table',
-            select: 'number',
-        }]);
-        res.status(200).json(populatedOrder);
+        res.status(200).json(newOrder);
     } catch (e) {
         res.status(400).json("Unable to order...");
     }
@@ -32,11 +29,7 @@ router.post('/:id', verifyTokenAndAuthorization, async (req, res) => {
 
 router.get('/user/:id', verifyTokenAndAuthorization, async (req, res) => {
     try {
-        const orders = await InProgressOrder.find({ table: req.params.id, status: { $lt: 4 } })
-            .populate({
-                path: 'products.product',
-                select: 'name price',
-            });
+        const orders = await InProgressOrder.find({ 'table._id': req.params.id, status: { $lt: 4 } })
         res.json(orders);
     } catch (e) {
         res.status(400).send("Can't get order.");
@@ -45,14 +38,7 @@ router.get('/user/:id', verifyTokenAndAuthorization, async (req, res) => {
 
 router.get('/chief', verifyTokenAndChief, async (req, res) => {
     try {
-        const orders = await InProgressOrder.find({ status: { $lt: 2} })
-            .populate([{
-                path: 'products.product',
-                select: 'name',
-            }, {
-                path: 'table',
-                select: 'number',
-            }]);
+        const orders = await InProgressOrder.find({ status: { $lt: 2} });
         const tables = await Table.find();
         res.status(200).json({ orders, tables });
     } catch (e) {
@@ -97,14 +83,7 @@ router.get('/admin/paid/:date', async (req, res) => {
     const {date} = req.params;
     try {
         const paidOrders = await PaidOrder
-            .find({createdAt: { $gte: new Date(date), $lt: new Date(date).setDate(new Date(date).getDate() + 1) }})
-            .populate([{
-                path: 'products.product',
-                select: 'name price',
-            }, {
-                path: 'table',
-                select: 'number',
-            }]).sort({createdAt:-1});
+            .find({createdAt: { $gte: new Date(date), $lt: new Date(date).setDate(new Date(date).getDate() + 1) }}).sort({createdAt:-1})
         res.status(200).json(paidOrders);
     } catch (e) {
         res.status(400).json("error.");
@@ -131,7 +110,7 @@ router.get('/inprogress',async(req,res)=>{
             return acc;
         }, {});
         orders.forEach(order=>{
-            arr[order.table].amount+=1;
+            arr[order.table._id].amount+=1;
             total+=1;
         })
         res.status(200).json({arr,total});
@@ -143,11 +122,7 @@ router.get('/inprogress',async(req,res)=>{
 router.get('/inprogress/:id', async(req,res)=>{
     try{
         const table = await Table.findById(req.params.id).select('number');
-        const orders = await InProgressOrder.find({table:req.params.id,status:{$lt:4}})
-            .populate({
-                path: 'products.product',
-                select: 'name price',
-            });
+        const orders = await InProgressOrder.find({'table._id':req.params.id,status:{$lt:4}})
         res.status(200).json({orders,tableNumber:table.number});
     }catch(e){
         res.status(400).json('error.');

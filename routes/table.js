@@ -12,6 +12,15 @@ router.get('/', async(req,res)=>{
     }
 });
 
+router.get('/single/:id', async(req,res)=>{
+    try{
+        const table = await Table.findById(req.params.id);
+        res.status(200).json(table);
+    }catch(e){
+        res.status(400).json(e.message);
+    }
+});
+
 router.post('/',async(req,res)=>{
     const {number,distance} = req.body;
     const newTable = new Table({number,distance,secret:crypto.randomBytes(5).toString('hex')});
@@ -37,7 +46,7 @@ router.put('/qr/:id', async(req,res)=>{
     }
 });
 
-router.put('/:id', async(req,res)=>{
+router.put('/single/:id', async(req,res)=>{
     try{
         const updatedTable = await Table.findByIdAndUpdate(req.params.id,{$set:req.body},{new:true});
         if(!updatedTable) return res.status(400).json('No table found to update...');
