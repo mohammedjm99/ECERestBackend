@@ -7,8 +7,8 @@ const server = http.createServer(app);
 
 const cors = require("cors");
 const allowedOrigins = [
-  'https://ecerest.onrender.com',
-  'https://ecerest2.onrender.com'
+  'http://localhost:3000',
+  'http://localhost:3001'
 ]
 app.use(cors({
   origin: (origin, callback) => {
