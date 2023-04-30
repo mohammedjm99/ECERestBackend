@@ -12,8 +12,8 @@ const verifyToken = (req, res, next) => {
 
 const verifyTokenAndAuthorization = (req, res, next) => {
     verifyToken(req,res,()=>{
-        if(req.user._id === req.params.id || req.user.rule === 'admin') next();
-        else res.status(403).json("You can't do this action");  
+        if(req.user._id === req.params.id || req.user.rule === 'admin' || req.user.rule === 'cashier') next();
+        else res.status(403).json("Unauthorized");  
     })
 }
 
@@ -21,7 +21,16 @@ const verifyTokenAndChief = (req, res, next) => {
     verifyToken(req,res,async()=>{
         if(req.user.rule === 'chief' || req.user.rule === 'admin') next();
         else{
-            res.status(403).json("You can't do this action");  
+            res.status(403).json("Unauthorized");  
+        }
+    })
+}
+
+const verifyTokenAndCashier = (req, res, next) => {
+    verifyToken(req,res,async()=>{
+        if(req.user.rule === 'cashier' || req.user.rule === 'admin') next();
+        else{
+            res.status(403).json("Unauthorized");  
         }
     })
 }
@@ -29,7 +38,16 @@ const verifyTokenAndChief = (req, res, next) => {
 const verifyTokenAndAdmin = (req, res, next) => {
     verifyToken(req,res,async()=>{
         if(req.user.rule === 'admin') next();
-        else res.status(403).json("You can't do this action");  
+        else res.status(403).json("Unauthorized");  
+    })
+}
+
+const verifyTokenAndManager = (req, res, next) => {
+    verifyToken(req,res,async()=>{
+        if(req.user.rule === 'cashier' || req.user.rule === 'admin' || req.user.rule === 'chief') next();
+        else{
+            res.status(403).json("Unauthorized");  
+        }
     })
 }
 
@@ -38,5 +56,7 @@ module.exports = {
     verifyToken,
     verifyTokenAndAuthorization,
     verifyTokenAndAdmin,
-    verifyTokenAndChief
+    verifyTokenAndChief,
+    verifyTokenAndCashier,
+    verifyTokenAndManager
 }

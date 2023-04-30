@@ -39,7 +39,7 @@ app.use('/api/product', productRouter);
 
 const io = require('socket.io')(server, {
   cors: {
-      origin: allowedOrigins,
+    origin: allowedOrigins,
   },
 });
 
@@ -53,41 +53,46 @@ const removeUser = (socketId) => {
   users = users.filter((user) => user.socketId !== socketId);
 };
 
-const getUser = (userId) => {
-  return users.find((user) => user.userId === userId);
-};
+// const getUser = (userId) => {
+//   return users.find((user) => user.userId === userId);
+// };
 
 io.on("connection", (socket) => {
 
   socket.on("joinUserO", userId => {
-      addUser(userId, socket.id, "user");
-      console.log(users);
-      console.count('joinUser');
+    addUser(userId, socket.id, "user");
   });
 
   socket.on("joinChief", userId => {
-      addUser(userId, socket.id, "chief");
-      console.log(users);
-      console.count('joinChief');
+    addUser(userId, socket.id, "chief");
+  });
+
+  socket.on("joinCashier", userId => {
+    addUser(userId, socket.id, "cashier");
   });
 
   socket.on("joinAdmin", userId => {
-      addUser(userId, socket.id, "admin");
-      console.log(users);
-      console.count('joinAdmin');
+    addUser(userId, socket.id, "admin");
   });
 
-  socket.on("disconnect", () => {
-      removeUser(socket.id);
-      console.log(users);
-      console.count('disconnect');
-  });
 
   socket.on("addOrder", data => {
-      for (const user of users) {
-          if (user.rule !== 'user') socket.to(user.socketId).emit("addOrder", data)
+    for (const user of users) {
+      if (user.rule !== 'user') {
+        socket.to(user.socketId).emit("addOrder", data);
       }
+    }
   })
+
+  socket.on("changeStatus", data => {
+    for (const user of users) {
+      if (user.rule === 'cashier' || user.rule === 'admin' || user.userId===data.table._id) socket.to(user.socketId).emit('changeStatus', data);
+    }
+  })
+
+  socket.on("disconnect", () => {
+    removeUser(socket.id);
+  });
 });
 
 mongoose.connect(process.env.MONGO_URI).then(() => {

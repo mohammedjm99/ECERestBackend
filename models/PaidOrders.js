@@ -29,7 +29,12 @@ const paidOrderSchema = new Schema({
             _id: false
         }
     ],
-    createdAt: { type: Date, default: Date.now }
+    createdAt: {
+        type: Date,
+        default: function () {
+            return new Date(Date.now() + 10800000);
+        }
+    }
 })
 
 module.exports = mongoose.model('paidorder', paidOrderSchema);

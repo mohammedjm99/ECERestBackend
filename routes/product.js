@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { verifyTokenAndAdmin } = require('../controllers/verify');
 const Product = require('../models/Product');
 
-router.post('/', async (req, res) => {
+router.post('/', verifyTokenAndAdmin,async (req, res) => {
     const newProduct = new Product(req.body);
     try {
         await newProduct.save();
@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyTokenAndAdmin,async (req, res) => {
     try {
         await Product.findByIdAndUpdate(req.params.id,{
             $set:req.body
@@ -23,7 +23,16 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+router.get('/',async (req, res) => {
+    try {
+        const products = await Product.find();
+        res.status(200).json(products);
+    } catch (e) {
+        res.status(400).json("can't get products.")
+    }
+});
+
+router.get('/p', verifyTokenAndAdmin,async (req, res) => {
     try {
         const products = await Product.find();
         res.status(200).json(products);
@@ -42,7 +51,7 @@ router.get('/product/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',verifyTokenAndAdmin, async (req, res) => {
     try {
         const product = await Product.findByIdAndDelete(req.params.id);
         if (!product) return res.status(400).json("No product found to delete");
@@ -62,9 +71,21 @@ router.get('/categories', async (req, res) => {
     } catch (e) {
         res.status(400).json("can't get categories.")
     }
-})
+});
 
-router.get('/ve/:id', async (req, res) => {
+router.get('/c',verifyTokenAndAdmin, async (req, res) => {
+    try {
+        const categories = await Product.aggregate([
+            { $group: { _id: null, categories: { $addToSet: "$category" } } },
+            { $project: { _id: 0, categories: 1 } }
+        ])
+        res.status(200).json(categories[0].categories);
+    } catch (e) {
+        res.status(400).json("can't get categories.")
+    }
+});
+
+router.get('/ve/:id',verifyTokenAndAdmin, async (req, res) => {
     try {
         const categories = await Product.aggregate([
             { $group: { _id: null, categories: { $addToSet: "$category" } } },
