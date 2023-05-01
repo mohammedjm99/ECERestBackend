@@ -10,7 +10,7 @@ router.get('/login/:secret', async(req,res)=>{
         const table = await Table.findOne({number: tableNumber});
         if(!table) return res.status(400).json("Invalid QR Code.");
         if(table.secret !== secret) return res.status(400).json("Invalid QR Code.");
-        const accessToken = jwt.sign({_id: table._id,number: table.number},process.env.JWT_SECRET,{expiresIn:"1d"});
+        const accessToken = jwt.sign({_id: table._id,number: table.number,s:table.secret},process.env.JWT_SECRET,{expiresIn:"1d"});
         res.status(200).json(accessToken);
     }catch(e){
         res.status(400).json("Internal server error.")

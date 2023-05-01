@@ -11,6 +11,10 @@ router.post('/:id', verifyTokenAndAuthorization ,async (req, res) => {
     const { products } = req.body;
     let orderedProducts = [];
     try {
+        const table = await Table.findById(req.params.id);
+        if(!req.user.rule){
+            if(table.secret!==req.user.s) return res.status(403).json("Unauthorized");
+        }
         for (const product of products) {
             if (product.quantity < 1 || product.quantity > 10) {
                 return res.status(400).json("developer tools are not used for hacking.");
@@ -19,11 +23,12 @@ router.post('/:id', verifyTokenAndAuthorization ,async (req, res) => {
             if (!foundProduct) return res.status(400).json("Item to be ordered is not found.");
             orderedProducts.push({ ...foundProduct._doc, quantity: product.quantity });
         }
-        const table = await Table.findById(req.params.id).select('number');
-
         const newOrder = new InProgressOrder({
             products: orderedProducts,
-            table
+            table:{
+                _id:table._id,
+                number:table.number
+            }
         })
         await newOrder.save();
         res.status(200).json(newOrder);

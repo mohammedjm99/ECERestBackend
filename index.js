@@ -9,7 +9,11 @@ const cors = require("cors");
 const allowedOrigins = [
   'https://ecerest.onrender.com',
   'https://ecerest2.onrender.com'
-]
+];
+// const allowedOrigins = [
+//   'http://172.20.10.5:3000',
+//   'http://172.20.10.5:3001'
+// ];
 app.use(cors({
   origin: (origin, callback) => {
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
@@ -82,11 +86,19 @@ io.on("connection", (socket) => {
         socket.to(user.socketId).emit("addOrder", data);
       }
     }
+  });
+
+  socket.on("removeOrder", ({id,table}) => {
+    for (const user of users) {
+      if (user.userId === table || user.rule==='admin' || user.rule==='cashier') {
+        socket.to(user.socketId).emit("removeOrder", {id,table});
+      }
+    }
   })
 
   socket.on("changeStatus", data => {
     for (const user of users) {
-      if (user.rule === 'cashier' || user.rule === 'admin' || user.userId===data.table._id) socket.to(user.socketId).emit('changeStatus', data);
+      if (user.rule === 'cashier' || user.rule === 'admin' || user.userId === data.table._id) socket.to(user.socketId).emit('changeStatus', data);
     }
   })
 
