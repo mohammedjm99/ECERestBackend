@@ -3,7 +3,7 @@ const InProgressOrder = require('../models/InProgressOrder');
 const PaidOrder = require('../models/PaidOrders');
 const Product = require('../models/Product');
 const Table = require('../models/Table');
-const { verifyTokenAndAuthorization, verifyTokenAndChief, verifyTokenAndAdmin,verifyTokenAndCashier } = require('../controllers/verify');
+const { verifyTokenAndAuthorization, verifyTokenAndChef, verifyTokenAndAdmin,verifyTokenAndCashier } = require('../controllers/verify');
 
 const { getWeeks } = require('../controllers/functions');
 
@@ -17,10 +17,11 @@ router.post('/:id', verifyTokenAndAuthorization ,async (req, res) => {
         }
         for (const product of products) {
             if (product.quantity < 1 || product.quantity > 10) {
-                return res.status(400).json("developer tools are not used for hacking.");
+                return res.status(400).json("invalid quantity.");
             }
-            const foundProduct = await Product.findById(product.product).select('name price -_id');
+            const foundProduct = await Product.findById(product.product).select('name price -_id isVisible');
             if (!foundProduct) return res.status(400).json("Item to be ordered is not found.");
+            if (!foundProduct.isVisible) return res.status(400).json(foundProduct.name+" is not available.");
             orderedProducts.push({ ...foundProduct._doc, quantity: product.quantity });
         }
         const newOrder = new InProgressOrder({
@@ -46,7 +47,7 @@ router.get('/user/:id', verifyTokenAndAuthorization, async (req, res) => {
     }
 });
 
-router.get('/chief', verifyTokenAndChief, async (req, res) => {
+router.get('/chef', verifyTokenAndChef, async (req, res) => {
     try {
         const orders = await InProgressOrder.find({ status: { $lt: 2 } });
         const tables = await Table.find({ number: { $ne: 0 } });
@@ -56,7 +57,7 @@ router.get('/chief', verifyTokenAndChief, async (req, res) => {
     }
 });
 
-router.put('/chief', verifyTokenAndChief, async (req, res) => {
+router.put('/chef', verifyTokenAndChef, async (req, res) => {
     const { id, status, msg } = req.body;
     try {
         const updatedOrder = await InProgressOrder.findByIdAndUpdate(id, {

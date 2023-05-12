@@ -17,9 +17,9 @@ const verifyTokenAndAuthorization = (req, res, next) => {
     })
 }
 
-const verifyTokenAndChief = (req, res, next) => {
+const verifyTokenAndChef = (req, res, next) => {
     verifyToken(req,res,async()=>{
-        if(req.user.rule === 'chief' || req.user.rule === 'admin') next();
+        if(req.user.rule === 'chef' || req.user.rule === 'admin') next();
         else{
             res.status(403).json("Unauthorized");  
         }
@@ -44,7 +44,7 @@ const verifyTokenAndAdmin = (req, res, next) => {
 
 const verifyTokenAndManager = (req, res, next) => {
     verifyToken(req,res,async()=>{
-        if(req.user.rule === 'cashier' || req.user.rule === 'admin' || req.user.rule === 'chief') next();
+        if(req.user.rule === 'cashier' || req.user.rule === 'admin' || req.user.rule === 'chef') next();
         else{
             res.status(403).json("Unauthorized");  
         }
@@ -56,7 +56,7 @@ module.exports = {
     verifyToken,
     verifyTokenAndAuthorization,
     verifyTokenAndAdmin,
-    verifyTokenAndChief,
+    verifyTokenAndChef,
     verifyTokenAndCashier,
     verifyTokenAndManager
 }

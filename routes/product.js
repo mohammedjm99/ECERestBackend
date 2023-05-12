@@ -96,6 +96,21 @@ router.get('/ve/:id',verifyTokenAndAdmin, async (req, res) => {
     } catch (e) {
         res.status(400).json("can't get categories.")
     }
-})
+});
+
+router.put('/ve/visibility',verifyTokenAndAdmin, async (req, res) => {
+    const {id,isVisible} = req.body;
+    try {
+        const newProduct = await Product.findByIdAndUpdate(id,{
+            $set:{
+                isVisible:!isVisible
+            }
+        },{new:true});
+        if(!newProduct) return res.status(400).json("product not found!");
+        res.status(200).json(newProduct);
+    } catch (e) {
+        res.status(400).json("can't edit product.")
+    }
+});
 
 module.exports = router;

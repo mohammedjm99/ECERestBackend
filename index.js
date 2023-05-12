@@ -67,8 +67,8 @@ io.on("connection", (socket) => {
     addUser(userId, socket.id, "user");
   });
 
-  socket.on("joinChief", userId => {
-    addUser(userId, socket.id, "chief");
+  socket.on("joinChef", userId => {
+    addUser(userId, socket.id, "chef");
   });
 
   socket.on("joinCashier", userId => {

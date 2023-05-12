@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const Table = require('../models/Table');
 const jwt = require('jsonwebtoken');
-const {verifyToken,verifyTokenAndAdmin,verifyTokenAndChief} = require('../controllers/verify');
+const {verifyToken,verifyTokenAndAdmin,verifyTokenAndChef} = require('../controllers/verify');
 
 router.get('/login/:secret', async(req,res)=>{
     try{
@@ -21,7 +21,7 @@ router.get('/requiretable' ,verifyToken,(req,res)=>{
     res.status(200).json();
 });
 
-router.get('/requirechief' ,verifyTokenAndChief,(req,res)=>{
+router.get('/requireChef' ,verifyTokenAndChef,(req,res)=>{
     res.status(200).json();
 });
 

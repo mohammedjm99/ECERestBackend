@@ -28,7 +28,7 @@ router.post('/', verifyTokenAndAdmin, async (req, res) => {
     const { username, password, rule } = req.body;
     if (!rule || !username || !password) return res.status(400).json('please fill all inputs...');
     try {
-        if (rule === 'chief' || rule === 'cashier') {
+        if (rule === 'chef' || rule === 'cashier') {
             const hashedPassword = await bcrypt.hash(password, 10);
             const newManager = new Manager({
                 username,
@@ -55,7 +55,7 @@ router.post('/', verifyTokenAndAdmin, async (req, res) => {
 router.put('/:id', verifyTokenAndAdmin, async (req, res) => {
     const { username, password, rule } = req.body
     try {
-        if (rule === 'chief' || rule === 'cashier') {
+        if (rule === 'chef' || rule === 'cashier') {
             if (password === 'fakeOne!!!!!!') {
                 const updatedManager = await Manager.findByIdAndUpdate(req.params.id, {
                     $set: {
